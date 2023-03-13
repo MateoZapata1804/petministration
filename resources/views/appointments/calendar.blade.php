@@ -18,6 +18,29 @@
 
     <input type="hidden" id="appointments" value="{{$appointments}}">
     <div class="container-fluid p-4 d-flex justify-content-end" id="container">
+        <div class="container w-25 pt-5">
+            @if(session('message'))
+                <div class="alert alert-danger">
+                    <b>{{session('message')}}</b>
+                </div>
+            @endif
+            <div class="card" id="apmtDetails" hidden>
+                <div class="card-header">
+                    <h3 id="appointmentTitle"></h3>
+                </div>
+                <div class="card-body">
+                    <span id="details"></span>
+                </div>
+                <div class="card-footer">
+                    <form action="{{route('appointment.delete')}}" method="post">
+                        <input type="hidden" name="apmtId" id="apmtId">
+                        @csrf
+                        @method("delete")
+                        <button class="btn btn-danger" type="submit">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="calendar bg-light" id="calendar">
             {{-- << CALENDARIO >> --}}
         </div>
@@ -65,7 +88,7 @@
                 title: `Cita con ${e.nombre_mascota}`,
                 start: e.fecha + " " + e.hora_inicio,
                 end: e.fecha + " " + e.hora_fin,
-                eventColor: 'orange'
+                color: 'orange'
             }
             appointments.push(eventToPush);
         });
@@ -80,10 +103,10 @@
                 dateClick: (date) => {
                     openFormModal(date.dateStr);
                 },
-                eventClick: (date, javascriptEvent, viewTitle) => {
-                    alert(date + " " + viewTitle);
+                eventClick: (date) => {
+                    showApmtDetails(date.event);
                 },
-                events: [appointments]
+                events: appointments
             });
 
             calendar.render();
@@ -93,6 +116,18 @@
             modal.show("fade");
             $("#dayText").text(date);
             $("#appointmentDay").val(date);
+        }
+
+        function showApmtDetails(date) {
+            console.log(date);
+            var str = `
+                <p>Hora de inicio: <b>${date.startStr.match(/\d{2}:\d{2}/)}</b></p>
+                <p>Hora de finalizacion: <b>${date.endStr.match(/\d{2}:\d{2}/)}</b></p>
+                `;
+            $("#apmtDetails").attr("hidden", false);
+            $("#appointmentTitle").html(date.title);
+            $("#details").html(str);
+            $("#apmtId").val(date.id);
         }
 
     </script>
